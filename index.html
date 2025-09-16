@@ -30,7 +30,6 @@
     padding: 2.5rem 3rem;
     max-width: 480px;
     width: 90%;
-    position: relative;
     text-align: center;
   }
   h1 {
@@ -142,14 +141,32 @@
   const urlInput = document.getElementById('urlInput');
   const resultDiv = document.getElementById('result');
 
-  function formatDate(d) {
+  function formatDate(date) {
     const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
                     'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
-    return `${d.getDate().toString().padStart(2, '0')} ${months[d.getMonth()]} ${d.getFullYear()}`;
+    return `${date.getDate().toString().padStart(2, '0')} ${months[date.getMonth()]} ${date.getFullYear()}`;
   }
 
   function generateRandomDate(start, end) {
     return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+  }
+
+  function getStoredDates(url) {
+    const data = localStorage.getItem('site_dates_' + url);
+    if (!data) return null;
+    try {
+      return JSON.parse(data);
+    } catch {
+      return null;
+    }
+  }
+
+  function storeDates(url, creation, expiration) {
+    const data = {
+      creation: creation.toISOString(),
+      expiration: expiration.toISOString()
+    };
+    localStorage.setItem('site_dates_' + url, JSON.stringify(data));
   }
 
   analyzeBtn.addEventListener('click', () => {
@@ -162,24 +179,35 @@
     const specialUrl = 'https://cash-flow-cash.netlify.app/index.html?ref=BCEC8G';
 
     if (url === specialUrl) {
-      const creationDate = new Date(2025, 8, 3); // 03 septembre 2025 (mois indexé 0)
-      const expirationDate = new Date(2026, 8, 3); // 03 septembre 2026
+      const creationDate = new Date(2025, 8, 3);
+      const expirationDate = new Date(2026, 8, 3);
       resultDiv.innerHTML =
         `Ce site a été créé le <span class="highlight">${formatDate(creationDate)}</span>.<br>` +
         `Date d'expiration <span class="highlight">${formatDate(expirationDate)}</span>.`;
       return;
     }
 
-    // Pour autres liens, date de création aléatoire en 2025
-    const startCreation = new Date(2025, 0, 1); // 1 janvier 2025
+    let stored = getStoredDates(url);
     const now = new Date();
-    let creationDate = generateRandomDate(startCreation, now);
 
-    // Date d'expiration entre 14 et 60 jours après création, pas après aujourd'hui
+    if (stored) {
+      const creationDate = new Date(stored.creation);
+      const expirationDate = new Date(stored.expiration);
+      resultDiv.innerHTML =
+        `Analyse précédente stockée pour ce site :<br>` +
+        `Date de création estimée : <span class="highlight">${formatDate(creationDate)}</span>.<br>` +
+        `Date d'expiration estimée : <span class="highlight">${formatDate(expirationDate)}</span>.`;
+      return;
+    }
+
+    // Génération et stockage de nouvelles dates
+    const startCreation = new Date(2025, 0, 1);
+    const creationDate = generateRandomDate(startCreation, now);
     const minExpiration = new Date(creationDate.getTime() + 14 * 24 * 3600 * 1000);
     const maxExpiration = new Date(creationDate.getTime() + 60 * 24 * 3600 * 1000);
     let expirationDate = generateRandomDate(minExpiration, maxExpiration);
     if (expirationDate > now) expirationDate = now;
+    storeDates(url, creationDate, expirationDate);
 
     resultDiv.innerHTML =
       `Analyse simulée du site :<br>` +
