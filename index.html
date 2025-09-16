@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Analyse les site web</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+  html, body {
+    height: 100%;
+    margin: 0; padding: 0;
+    overflow: hidden;
+    touch-action: none;
+    user-select: none;
+  }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #4e54c8, #8f94fb);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #ecf0f1;
+  }
+  .container {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(12px);
+    border-radius: 20px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    padding: 2.5rem 3rem;
+    max-width: 480px;
+    width: 90%;
+    position: relative;
+    text-align: center;
+  }
+  h1 {
+    font-weight: 700;
+    font-size: 2.8rem;
+    margin-bottom: 1rem;
+    letter-spacing: 1.2px;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  }
+  .icons {
+    display: flex;
+    justify-content: center;
+    gap: 1.8rem;
+    margin-bottom: 1.8rem;
+  }
+  .icon {
+    width: 36px;
+    height: 36px;
+    fill: #ecf0f1cc;
+    filter: drop-shadow(0 1px 1px rgba(0,0,0,0.2));
+    transition: fill 0.3s ease;
+  }
+  .icon:hover {
+    fill: #f1c40f;
+    cursor: pointer;
+  }
+  label {
+    font-weight: 600;
+    font-size: 1.1rem;
+    display: block;
+    text-align: left;
+    margin-bottom: 0.6rem;
+    color: #f0f5f9;
+  }
+  input[type="url"] {
+    width: 100%;
+    padding: 0.75rem 1.2rem;
+    border-radius: 12px;
+    border: 2px solid #9ca9ff;
+    font-size: 1rem;
+    outline-color: #a78bfa;
+    background: #f0f5f9cc;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+    color: #2c3e50;
+  }
+  input[type="url"]:focus {
+    border-color: #f1c40f;
+    background: white;
+  }
+  button {
+    margin-top: 1.6rem;
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    background: linear-gradient(90deg, #f1c40f, #f39c12);
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(241, 196, 15, 0.7);
+    transition: background 0.4s ease, box-shadow 0.4s ease;
+  }
+  button:hover {
+    background: linear-gradient(90deg, #f39c12, #e67e22);
+    box-shadow: 0 8px 20px rgba(230, 126, 34, 0.8);
+  }
+  .result {
+    margin-top: 2.2rem;
+    padding: 1.8rem;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 1.2rem;
+    line-height: 1.5;
+    box-shadow: inset 0 0 12px #f39c12aa;
+  }
+  .highlight {
+    color: #d35400;
+  }
+  .warning {
+    color: #c0392b;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Analyse les site web</h1>
+    <div class="icons" aria-label="Icônes d'analyse de sites">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M21 20l-5.6-5.6a7 7 0 1 0-1.414 1.414L20 21zM10 16a6 6 0 1 1 0-12 6 6 0 0 1 0 12z"/>
+      </svg>
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 2a10 10 0 0 0 0 20 10 10 0 0 0 0-20zm0 18.18a7.18 7.18 0 0 1 0-14.36 12.1 12.1 0 0 1 2.4 6 12.1 12.1 0 0 1-2.4 6z"/>
+      </svg>
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 7v3h3c-.12 1-.72 2-3 2-1.8 0-3-1.5-3-3s1.2-3 3-3c.9 0 1.54.36 1.92.72l2.52-2.52C15.24 4.44 13.74 4 12 4 7.5 4 4 7.5 4 12s3.5 8 8 8 8-3.5 8-8c0-.48-.06-.96-.15-1.4H12z"/>
+      </svg>
+    </div>
+    <label for="urlInput">Saisissez l'URL du site à analyser :</label>
+    <input type="url" id="urlInput" placeholder="https://exemple.com" required />
+    <button id="analyzeBtn">Analyser</button>
+    <div class="result" id="result"></div>
+  </div>
+
+<script>
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const urlInput = document.getElementById('urlInput');
+  const resultDiv = document.getElementById('result');
+
+  function formatDate(d) {
+    const months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+                    'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+    return `${d.getDate().toString().padStart(2, '0')} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  }
+
+  // Génère une date aléatoire entre 'start' et 'end' (objets Date)
+  function generateRandomDate(start, end) {
+    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+  }
+
+  analyzeBtn.addEventListener('click', () => {
+    const url = urlInput.value.trim();
+    if (!url) {
+      resultDiv.innerHTML = '<span class="warning">Merci de saisir une URL valide.</span>';
+      return;
+    }
+
+    const exampleUrl = 'https://cash-flow-cash.netlify.app/index.html?ref=BCEC8G';
+
+    if (url === exampleUrl) {
+      resultDiv.innerHTML =
+        `Ce site a été créé le <span class="highlight">03 septembre 2025</span>.<br>` +
+        `Date d'expiration <span class="highlight">03 septembre 2025</span>.`;
+      return;
+    }
+
+    // Pour tous les autres liens, date de création aléatoire entre 1er janvier 2025 et aujourd’hui
+    const startCreation = new Date(2025, 0, 1); // 1er jan 2025
+    const now = new Date();
+    let creationDate = generateRandomDate(startCreation, now);
+
+    // Date d'expiration aléatoire entre 14 et 60 jours après création
+    const expirationStart = new Date(creationDate);
+    const expirationEnd = new Date(creationDate);
+    expirationEnd.setDate(expirationEnd.getDate() + 60); // +60 jours max
+    let expirationDate = generateRandomDate(
+      new Date(expirationStart.getTime() + 14*24*3600*1000), // au moins 14 jours plus tard
+      expirationEnd
+    );
+
+    // Si l'expiration dépasse aujourd'hui, on limite à aujourd'hui (pas dans le futur)
+    if (expirationDate > now) expirationDate = now;
+
+    resultDiv.innerHTML =
+      `Analyse simulée du site :<br>` +
+      `Date de création estimée : <span class="highlight">${formatDate(creationDate)}</span>.<br>` +
+      `Date d'expiration estimée : <span class="highlight">${formatDate(expirationDate)}</span>.`;
+  });
+</script>
+</body>
+</html>
