@@ -148,7 +148,6 @@
     return `${d.getDate().toString().padStart(2, '0')} ${months[d.getMonth()]} ${d.getFullYear()}`;
   }
 
-  // Génère une date aléatoire entre 'start' et 'end' (objets Date)
   function generateRandomDate(start, end) {
     return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
   }
@@ -160,30 +159,26 @@
       return;
     }
 
-    const exampleUrl = 'https://cash-flow-cash.netlify.app/index.html?ref=BCEC8G';
+    const specialUrl = 'https://cash-flow-cash.netlify.app/index.html?ref=BCEC8G';
 
-    if (url === exampleUrl) {
+    if (url === specialUrl) {
+      const creationDate = new Date(2025, 8, 3); // 03 septembre 2025 (mois indexé 0)
+      const expirationDate = new Date(2026, 8, 3); // 03 septembre 2026
       resultDiv.innerHTML =
-        `Ce site a été créé le <span class="highlight">03 septembre 2025</span>.<br>` +
-        `Date d'expiration <span class="highlight">03 septembre 2025</span>.`;
+        `Ce site a été créé le <span class="highlight">${formatDate(creationDate)}</span>.<br>` +
+        `Date d'expiration <span class="highlight">${formatDate(expirationDate)}</span>.`;
       return;
     }
 
-    // Pour tous les autres liens, date de création aléatoire entre 1er janvier 2025 et aujourd’hui
-    const startCreation = new Date(2025, 0, 1); // 1er jan 2025
+    // Pour autres liens, date de création aléatoire en 2025
+    const startCreation = new Date(2025, 0, 1); // 1 janvier 2025
     const now = new Date();
     let creationDate = generateRandomDate(startCreation, now);
 
-    // Date d'expiration aléatoire entre 14 et 60 jours après création
-    const expirationStart = new Date(creationDate);
-    const expirationEnd = new Date(creationDate);
-    expirationEnd.setDate(expirationEnd.getDate() + 60); // +60 jours max
-    let expirationDate = generateRandomDate(
-      new Date(expirationStart.getTime() + 14*24*3600*1000), // au moins 14 jours plus tard
-      expirationEnd
-    );
-
-    // Si l'expiration dépasse aujourd'hui, on limite à aujourd'hui (pas dans le futur)
+    // Date d'expiration entre 14 et 60 jours après création, pas après aujourd'hui
+    const minExpiration = new Date(creationDate.getTime() + 14 * 24 * 3600 * 1000);
+    const maxExpiration = new Date(creationDate.getTime() + 60 * 24 * 3600 * 1000);
+    let expirationDate = generateRandomDate(minExpiration, maxExpiration);
     if (expirationDate > now) expirationDate = now;
 
     resultDiv.innerHTML =
